@@ -1,0 +1,112 @@
+
+Building configuration...
+
+Current configuration : 1275 bytes
+!
+version 12.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname R1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+aaa new-model
+!
+!
+!
+aaa session-id common
+memory-size iomem 5
+no ip icmp rate-limit unreachable
+ip flow-cache timeout inactive 10
+ip flow-cache timeout active 1
+!
+!
+ip cef
+no ip domain lookup
+ip domain name rtp.cisco.com
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+username kyle password 0 kyle
+!
+!
+ip tcp synwait-time 5
+ip ssh time-out 60
+ip ssh authentication-retries 0
+ip ssh version 2
+! 
+!
+!
+!
+!
+interface FastEthernet0/0
+ ip address 192.168.122.20 255.255.255.0
+ ip flow ingress
+ ip flow egress
+ duplex auto
+ speed auto
+!
+interface FastEthernet0/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+!
+no ip http server
+no ip http secure-server
+ip forward-protocol nd
+ip flow-export source FastEthernet0/0
+ip flow-export version 9
+ip flow-export destination 192.168.122.1 2055
+!
+!
+!
+no cdp log mismatch duplex
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ privilege level 15
+ transport input ssh
+line vty 5 15
+ privilege level 15
+ transport input ssh
+!
+!
+end
