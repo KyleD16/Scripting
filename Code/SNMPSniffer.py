@@ -4,7 +4,7 @@ import sqlite3
 import paramiko
 import time
 
-# Function to retrieve router credentials from the database
+
 def get_router_credentials(router_ip):
     try:
         conn = sqlite3.connect('/home/kyle/routers.db')
@@ -18,7 +18,7 @@ def get_router_credentials(router_ip):
         return None
     
     
-    # Function to connect to the router using Paramiko
+    
 def connect_to_router(ip, username, password):
     ssh_client = paramiko.SSHClient()
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -36,7 +36,7 @@ def connect_to_router(ip, username, password):
 def start_sniffing(interface, db_connection):
     print("Starting SNMP trap message sniffing...")
     try:
-        # Adjust the filter to capture SNMP trap packets (UDP port 161)
+        
         sniff(filter="udp and port 162", iface=interface, prn=lambda pkt: process_snmp_trap(pkt, db_connection))
     except Exception as e:
         print(f"Error occurred during packet sniffing: {e}")
@@ -44,46 +44,46 @@ def start_sniffing(interface, db_connection):
 def process_snmp_trap(packet, db_connection):
     try:
         if packet.haslayer(UDP):
-            # Check if packet is SNMP trap (UDP port 161)
+            
             if packet[UDP].dport == 162:
-                # SNMP trap processing logic
+               
                 current_date = time.strftime("%Y-%m-%d")
                 current_time = time.strftime("%H:%M:%S")
                 Router_ip = packet[IP].src
                 
-                # Print packet details
+               
                 print("Captured Packet Details:")
                 print(f"Date: {current_date}")
                 print(f"Time: {current_time}")
                 print(f"Router IP: {Router_ip}")
 
-                # Print full packet structure for debugging
+               
                 print("Full Packet Structure:")
                 packet.show()
 
-                # Check if it's a SYSLOG trap
+               
                 if 'syslog' in packet:
-                    # Extract SYSLOG trap information
+                   
                     print("SYSLOG trap detected.")
                     message = packet['syslog'].community.decode('utf-8')
 
-                    # Print message for debugging
+                  
                     print(f"Message: {message}")
 
-                    # Store SYSLOG trap information in the database
+                   
                     cursor = db_connection.cursor()
                     cursor.execute("INSERT INTO syslog_data (Date, Time, Router_IP, Message) VALUES (?, ?, ?, ?)",
                                    (current_date, current_time, Router_ip, message))
                     db_connection.commit()
                     print("SYSLOG trap information inserted into the database.")
 
-                # Check if it's a LINK UP or LINK DOWN trap
+               
                 elif 'IF-MIB' in packet:
-                    # Extract LINK UP or LINK DOWN trap information
+                    
                     interface_name = packet['IF-MIB'].physAddress
                     state = packet['IF-MIB'].ifAdminStatus
 
-                    # Store LINK UP or LINK DOWN trap information in the database
+                    
                     cursor = db_connection.cursor()
                     cursor.execute("INSERT INTO link_trap_data (Date, Time, Router_IP, Interface_Name, State) VALUES (?, ?, ?, ?, ?)",
                                    (current_date, current_time, Router_ip, interface_name, state))
