@@ -73,7 +73,7 @@ def set_netflow_settings(ip_address):
                 "ip flow-export version 9",
                 f"ip flow-export destination 192.168.122.1 2055",
                 "exit",
-                "write mem"  # Save configuration changes
+                "write mem"  
             ]
             for command in commands:
                 execute_command(ssh_client, command)
@@ -116,7 +116,7 @@ def remove_netflow_settings(ip_address):
                 "no ip flow-export source FastEthernet0/0",
                 "no ip flow-export destination 192.168.122.1 2055",
                 "exit",
-                "write mem"  # Save configuration changes
+                "write mem" 
             ]
             for command in commands:
                 execute_command(ssh_client, command)
@@ -184,10 +184,10 @@ def setup_backup_time():
         conn = sqlite3.connect('/home/kyle/routers.db')
         cursor = conn.cursor()
 
-        # Collect backup time from user
+    
         backup_time = input("Enter the backup time (HH:MM): ")
 
-        # Insert backup time into the BackupSchedule table
+       
         cursor.execute("INSERT INTO BackupSchedule (backup_time) VALUES (?)", (backup_time,))
         conn.commit()
 
@@ -228,7 +228,7 @@ def set_snmp_settings(ip_address):
                 "snmp-server enable traps syslog",
                 "snmp-server host 192.168.122.1 version 2c SFN",
                 "exit",
-                "write mem"  # Save configuration changes
+                "write mem"  
             ]
             for command in commands:
                 execute_command(ssh_client, command)
@@ -271,7 +271,7 @@ def remove_snmp_settings(ip_address):
                 "no snmp-server enable traps syslog",
                 "no snmp-server host 192.168.122.1 version 2c SFN",
                 "exit",
-                "write mem"  # Save configuration changes
+                "write mem" 
             ]
             for command in commands:
                 execute_command(ssh_client, command)
@@ -300,11 +300,11 @@ def calculate_packet_percentage(router_ip):
             total_packets = sum(counts)
             percentages = [(count / total_packets) * 100 for count in counts]
 
-            # Plotting the pie chart
+          
             plt.figure(figsize=(8, 8))
             plt.pie(percentages, labels=protocols, autopct='%1.1f%%')
             plt.title(f"Packet Distribution for Router IP: {router_ip}")
-            plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+            plt.axis('equal')  
             plt.show()
         else:
             print(f"No data found for router with IP {router_ip}.")
@@ -339,13 +339,13 @@ def get_current_config(ip_address):
             current_config = ""
             for command in commands:
                 output = execute_command(ssh_client, command)
-                current_config += output if output else ""  # Append output to the configuration string
+                current_config += output if output else ""  
                 time.sleep(1)
 
             ssh_client.disconnect()
             print(f"SSH connection closed with router at {router_ip}")
-            print(current_config)  # Print the current configuration for debug
-            return current_config  # Return the current configuration as a string
+            print(current_config)  
+            return current_config  
         else:
             print(f"No router found with IP {ip_address}.")
             return None
@@ -368,13 +368,13 @@ def fetch_router_backup_config(router_ip, backup_date):
 
         if backup_filepath:
             with open(backup_filepath, 'r') as backup_file:
-                backup_config = backup_file.read()  # Read the backup configuration as a string
-                current_config = get_current_config(router_ip)  # Fetch the current configuration
+                backup_config = backup_file.read() 
+                current_config = get_current_config(router_ip) 
                 
-                # Generate a unified diff between current_config and backup_config
+              
                 diff = difflib.unified_diff(current_config.splitlines(), backup_config.splitlines(), lineterm='')
                 
-                # Return the unified diff as a string
+              
                 return '\n'.join(diff) if diff else "No differences found."
         else:
             print(f"No backup configuration found for router {router_ip} on {backup_date}.")
@@ -391,7 +391,7 @@ def compare_configs(router_ip, backup_date):
         backup_config = fetch_router_backup_config(router_ip, backup_date)
 
         if current_config is not None and backup_config is not None:
-            # Perform unified diff between current and backup configurations
+           
             diff = difflib.unified_diff(current_config.splitlines(), backup_config.splitlines(), lineterm='')
             print(f"Differences between current configuration and backup configuration on {backup_date}:")
             for line in diff:
