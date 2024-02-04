@@ -4,7 +4,7 @@ import sqlite3
 import paramiko
 import time
 
-# Function to retrieve router credentials from the database
+
 def get_router_credentials(router_ip):
     try:
         conn = sqlite3.connect('/home/kyle/routers.db')
@@ -17,7 +17,7 @@ def get_router_credentials(router_ip):
         print(f"SQLite error: {e}")
         return None
 
-# Function to connect to the router using Paramiko
+
 def connect_to_router(ip, username, password):
     ssh_client = paramiko.SSHClient()
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -31,7 +31,7 @@ def connect_to_router(ip, username, password):
         print(f"Error occurred while connecting to router at {ip}: {e}")
     return None
 
-# Function to start packet sniffing
+
 def start_sniffing(interface, db_connection):
     print("Starting packet sniffing...")
     try:
@@ -39,16 +39,16 @@ def start_sniffing(interface, db_connection):
     except Exception as e:
         print(f"Error occurred during packet sniffing: {e}")
 
-# Sniffing function to process NetFlow packets
+
 def process_netflow_packet(packet, db_connection):
     try:
-        # Check if packet is NetFlow version 5
+        
         if packet.haslayer(UDP) and packet[UDP].dport == 2055:
-            # Get current date and time
+          
             current_date = time.strftime("%Y-%m-%d")
             current_time = time.strftime("%H:%M:%S")
 
-            # Extract packet information
+            
             source_ip = packet[IP].src
             dest_ip = packet[IP].dst
             source_port = packet[UDP].sport
@@ -57,7 +57,7 @@ def process_netflow_packet(packet, db_connection):
             num_packets = len(packet)
             Router_ip = packet[IP].src
 
-            # Print extracted information
+            
             print("Packet Details:")
             print(f"Date: {current_date}")
             print(f"Time: {current_time}")
@@ -67,7 +67,7 @@ def process_netflow_packet(packet, db_connection):
             print(f"Destination IP: {dest_ip}, Destination Port: {dest_port}")
             print(f"Protocol: {protocol}")
 
-            # Store packet information in the database
+          
             cursor = db_connection.cursor()
             cursor.execute("INSERT INTO netflow_data (Date, Time, Router_ip, source_ip, dest_ip, source_port, dest_port, protocol, num_packets) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                            (current_date, current_time, Router_ip, source_ip, dest_ip, source_port, dest_port, protocol, num_packets))
@@ -76,7 +76,7 @@ def process_netflow_packet(packet, db_connection):
     except Exception as e:
         print(f"Error occurred while processing NetFlow packet: {e}")
 
-# Create a socket listening on port 2055
+
 def create_netflow_socket():
     try:
         netflow_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -86,24 +86,24 @@ def create_netflow_socket():
         print(f"Error occurred while creating NetFlow socket: {e}")
         return None
 
-# Main function
+
 def main():
     try:
-        # Prompt user to enter the IP address of the router
+       
         router_ip = input("Enter the IP address of the router you want to connect to: ")
 
-        # Get router credentials from the database
+       
         credentials = get_router_credentials(router_ip)
         if credentials:
             username, password = credentials
 
-            # Connect to the router using Paramiko
+           
             ssh_client = connect_to_router(router_ip, username, password)
             if ssh_client:
-                # Create database connection
+               
                 db_connection = sqlite3.connect('/home/kyle/routers.db')
 
-                # Start packet sniffing if the connection to the router is successful
+               
                 start_sniffing("virbr0", db_connection)
             else:
                 print("Failed to connect to the router. Exiting...")
@@ -112,6 +112,6 @@ def main():
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# Execute the main function if the script is run directly
+
 if __name__ == "__main__":
     main()
